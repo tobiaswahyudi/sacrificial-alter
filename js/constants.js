@@ -1,0 +1,7 @@
+const TILE_ROWS = 12;
+const TILE_COLS = 16;
+
+const TILE_SIZE = 32
+
+const GAME_WIDTH = TILE_SIZE * (TILE_COLS + 2);
+const GAME_HEIGHT = TILE_SIZE * (TILE_ROWS + 2);
