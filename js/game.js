@@ -25,7 +25,7 @@ class Game {
 
     // Initialize modules
     this.world = new WorldMap(this);
-    this.levelManager = new LevelManager(this, new Position(6, 0), "BEGIN", 0, 0)
+    this.levelManager = new LevelManager(this, new Position(6, 1), "BEGIN", 0, 0)
 
     this.assetsPreloaded = false;
     this.loadedImages = new Map();

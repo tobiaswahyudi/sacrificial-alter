@@ -11,6 +11,10 @@ const PLAYER_BOTTOM = 1 - PLAYER_TOP - PLAYER_HEIGHT;
 
 const PLAYER_TOP_LEFT = new Position(PLAYER_LEFT, PLAYER_TOP).scale(TILE_SIZE);
 
+const PLAYER_CENTER = new Position(PLAYER_LEFT, PLAYER_TOP).m_add(
+  new Position(PLAYER_WIDTH, PLAYER_HEIGHT).scale(0.5),
+).scale(TILE_SIZE);
+
 const MOVE_ACCEL = 0.1;
 const MOVE_SPEED = 2;
 
@@ -19,6 +23,8 @@ const GRAVITY = 0.15;
 const JUMP_SPEED = 5;
 
 const EPSILON = 1;
+
+const SCREEN_TRANSITION_NUDGE = 4;
 
 const PLAYER_COLLISION_CHECKPOINT_BEHIND = -0.4;
 const PLAYER_COLLISION_CHECKPOINT_AFTER = 1.4;
@@ -73,26 +79,22 @@ class LevelManager {
   constructor(game, playerPos, titleString, srow, scol) {
     this.game = game;
     this.titleString = titleString;
-    this.srow = srow;
-    this.scol = scol;
 
     this.player = playerPos.scale(TILE_SIZE);
     this.playerVel = new Position(0, 0);
     this.onGround = false;
 
-    this.map = [];
-
     this.animations = new AnimationManager(game, this.state);
-
     this.juiceOffset = new Position(0, 0);
 
-    this.tiles = [];
-    this.parse();
+    this.transitionToLevel(srow, scol);
   }
 
-  parse() {
-    const srow = this.srow;
-    const scol = this.scol;
+  transitionToLevel(srow, scol) {
+    this.map = [];
+    this.tiles = [];
+    this.srow = srow;
+    this.scol = scol;
 
     // add corners and edges into map screen
     let ul = this.game.world.get(srow - 1, scol - 1);
@@ -104,17 +106,20 @@ class LevelManager {
     let dm = this.game.world.get(srow + 1, scol + 0);
     let dr = this.game.world.get(srow + 1, scol + 1);
 
-    const emptyRow = new Array(TILE_COLS).fill(".");
-    const emptyCol = new Array(TILE_ROWS).fill(".");
+    // If not found, put walls
+    const DEFAULT_TILE = "#";
 
-    ul = last(last(ul)) || ".";
+    const emptyRow = new Array(TILE_COLS).fill(DEFAULT_TILE);
+    const emptyCol = new Array(TILE_ROWS).fill(DEFAULT_TILE);
+
+    ul = last(last(ul)) || DEFAULT_TILE;
     um = last(um) || [...emptyRow];
-    ur = first(last(ur)) || ".";
+    ur = first(last(ur)) || DEFAULT_TILE;
     ml = ml?.map((c) => last(c)) || [...emptyCol];
     mr = mr?.map((c) => first(c)) || [...emptyCol];
-    dl = last(first(dl)) || ".";
+    dl = last(first(dl)) || DEFAULT_TILE;
     dm = first(dm) || [...emptyRow];
-    dr = first(first(dr)) || ".";
+    dr = first(first(dr)) || DEFAULT_TILE;
 
     this.map = this.game.world
       .get(srow, scol)
@@ -258,7 +263,7 @@ class LevelManager {
   // Level Input Handling
   applyInput() {
     // Jump
-    if (this.game.keys["Space"] && this.onGround) {
+    if ((this.game.keys["ArrowUp"] || this.game.keys["Space"]) && this.onGround) {
       this.playerVel.y = -JUMP_SPEED;
       this.onGround = false;
     }
@@ -365,5 +370,24 @@ class LevelManager {
       (1 - PLAYER_LEFT) * TILE_SIZE,
       // "#f8138d",
     );
+
+    // Check transition
+    const [pRow, pCol] = this.getRowCol(this.player.add(PLAYER_CENTER));
+    // Remember there are 2 extra rows and cols on the border.
+    if (pCol == TILE_COLS + 1) {
+      this.player.x -= (TILE_COLS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.transitionToLevel(this.srow, this.scol + 1);
+    } else if (pCol == 0) {
+      this.player.x += (TILE_COLS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.transitionToLevel(this.srow, this.scol - 1);
+    }
+
+    if (pRow == TILE_ROWS + 1) {
+      this.player.y -= (TILE_ROWS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.transitionToLevel(this.srow + 1, this.scol);
+    } else if (pRow == 0) {
+      this.player.y += (TILE_ROWS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.transitionToLevel(this.srow - 1, this.scol);
+    }
   }
 }

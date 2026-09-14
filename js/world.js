@@ -31,6 +31,6 @@ class WorldMap {
 
   get(row, col) {
     if(row < 0 || row <= this.screens.length) return undefined;
-    return this.screens[row][col]
+    return this.screens[row]?.[col]
   }
 }
