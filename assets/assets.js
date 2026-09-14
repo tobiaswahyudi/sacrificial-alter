@@ -7,6 +7,9 @@ const ASSETS = {
     GOLEM: "assets/img/lem.png",
     ALTAR: "assets/img/altar.png",
   },
+  UI: {
+    POPUP: "assets/ui/popup.png"
+  },
   STINK: "assets/img/icon.png",
 };
 

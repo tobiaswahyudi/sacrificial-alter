@@ -87,6 +87,8 @@ class LevelManager {
     this.animations = new AnimationManager(game, this.state);
     this.juiceOffset = new Position(0, 0);
 
+    this.altarPopup = undefined;
+
     this.transitionToLevel(srow, scol);
   }
 
@@ -209,7 +211,7 @@ class LevelManager {
         if (this.player.y > topLimit) {
           this.player.y = topLimit;
           if (this.playerVel.y >= 0) {
-            console.log("grounded");
+            // console.log("grounded");
             this.onGround = true;
           }
           this.playerVel.y = 0;
@@ -291,9 +293,31 @@ class LevelManager {
     this.player.m_add(this.playerVel);
   }
 
+  renderAltarPopup(hMid, vMid) {
+    return () => {
+      this.game.drawText("USE THE ALTAR", hMid, vMid - 12 - 16, {
+        color: "#ce1b1b",
+        font: "500 14px Alkhemikal",
+        align: "center",
+      });
+
+      this.game.drawText("REMAKE THYSELF", hMid, vMid - 12, {
+        color: "#ce1b1b",
+        font: "500 18px Alkhemikal",
+        align: "center",
+      });
+      this.game.drawText("[E]", hMid, vMid - 12 + 24, {
+        color: "#ce1b1b",
+        font: "700 18px monospace",
+        align: "center",
+      });
+    };
+  }
+
   // Level Rendering
   renderGame() {
     const { width, height } = this.game;
+    const [pRow, pCol] = this.getRowCol(this.player.add(PLAYER_CENTER));
 
     this.applyGravity();
     this.applyInput();
@@ -306,7 +330,7 @@ class LevelManager {
     // Tiles
     this.tiles.forEach((tile) => {
       switch (tile.type) {
-        case "wall": {
+        case TILE_TYPE_WALL: {
           this.game.drawRect(
             tile.c * TILE_SIZE,
             tile.r * TILE_SIZE,
@@ -318,18 +342,21 @@ class LevelManager {
           );
           break;
         }
-        case "altar": {
+        case TILE_TYPE_ALTAR: {
           this.game.drawImage(
             ASSETS.SPRITE.ALTAR,
             tile.c * TILE_SIZE,
             tile.r * TILE_SIZE,
             TILE_SIZE,
-            TILE_SIZE
+            TILE_SIZE,
           );
           break;
         }
       }
     });
+
+    // Draw animations behind tiles & stuff
+    this.animations.tick();
 
     this.game.drawImage(
       ASSETS.SPRITE.GOLEM,
@@ -338,6 +365,34 @@ class LevelManager {
       TILE_SIZE,
       TILE_SIZE,
     );
+
+    // Check Tile Interactions
+    const currentTile = this.tiles.find((t) => t.r == pRow && t.c == pCol);
+    if (currentTile?.type == TILE_TYPE_ALTAR) {
+      // Draw Nineslice
+      if (!this.altarPopup) {
+        const hMid = (pCol + 0.5) * TILE_SIZE;
+        const vMid = (pRow - 2) * TILE_SIZE;
+        this.altarPopup = new PopupAnimation(
+          112,
+          32,
+          hMid,
+          vMid,
+          false,
+          this.renderAltarPopup(hMid, vMid),
+          THUNK,
+          {
+            blocksInput: false,
+          },
+        );
+        this.animations.push(this.altarPopup);
+      }
+    } else {
+      if (this.altarPopup) {
+        this.altarPopup.needsInput = false;
+        this.altarPopup = undefined;
+      }
+    }
 
     // Draw checkpointers
     const PLAYER_ACTUAL_TOP_RIGHT = this.player.add(PLAYER_TOP_LEFT);
@@ -348,12 +403,12 @@ class LevelManager {
         .scale(TILE_SIZE)
         .add(PLAYER_ACTUAL_TOP_RIGHT);
 
-    const renderCheckpoints = (color, pts) => {
-      pts.forEach((pt) => {
-        const loc = checkpointToWorldSpace(pt);
-        this.game.drawCircle(loc.x, loc.y, 2, color, true);
-      });
-    };
+    // const renderCheckpoints = (color, pts) => {
+    //   pts.forEach((pt) => {
+    //     const loc = checkpointToWorldSpace(pt);
+    //     this.game.drawCircle(loc.x, loc.y, 2, color, true);
+    //   });
+    // };
 
     // renderCheckpoints("#f8f813", PLAYER_FEET_CHECKPOINTS);
     this.checkSide(
@@ -392,7 +447,6 @@ class LevelManager {
     );
 
     // Check transition
-    const [pRow, pCol] = this.getRowCol(this.player.add(PLAYER_CENTER));
     // Remember there are 2 extra rows and cols on the border.
     if (pCol == TILE_COLS + 1) {
       this.player.x -= TILE_COLS * TILE_SIZE - SCREEN_TRANSITION_NUDGE;

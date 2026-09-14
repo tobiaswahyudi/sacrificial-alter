@@ -1,8 +1,8 @@
-const POPUP_FRAMES_PER_PX = 0.012;
+const POPUP_FRAMES_PER_PX = 0.075;
 const POPUP_CORNER_SLICE_SIZE = 24;
-const POPUP_NINESLICE_SIZE = 128;
+const POPUP_NINESLICE_SIZE = 64;
 
-const POPUP_CORNER_SIZE = POPUP_CORNER_SLICE_SIZE;
+const POPUP_CORNER_SIZE = 24;
 
 const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents, opacity) => {
   const VERTICAL_FRAMES = height * POPUP_FRAMES_PER_PX;
@@ -161,18 +161,18 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
 
     game.ctx.restore();
 
-    const mask = new Path2D();
+    // const mask = new Path2D();
 
-    mask.rect(
-      left + POPUP_CORNER_SIZE,
-      top + POPUP_CORNER_SIZE,
-      innerWidth,
-      innerHeight
-    );
+    // mask.rect(
+    //   left + POPUP_CORNER_SIZE,
+    //   top + POPUP_CORNER_SIZE,
+    //   innerWidth,
+    //   innerHeight
+    // );
 
     if (renderContents) {
       game.ctx.save();
-      game.ctx.clip(mask);
+      // game.ctx.clip(mask);
       renderContents(game, frame);
       game.ctx.restore();
     }
@@ -184,6 +184,8 @@ class PopupAnimation extends GSAnimation {
     const handleInput = () => {
       return this.frame >= this.frames;
     };
+
+    console.log(Math.ceil((width + height) * POPUP_FRAMES_PER_PX))
 
     super({
       frames: Math.ceil((width + height) * POPUP_FRAMES_PER_PX),
