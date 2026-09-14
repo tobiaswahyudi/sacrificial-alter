@@ -21,11 +21,11 @@ class Game {
 
     // Input handling
     this.keys = {};
-    this.keysPressed = {}; // For single keypress detection
+    // this.keysPressed = {}; // For single keypress detection
 
     // Initialize modules
     this.world = new WorldMap(this);
-    this.levelManager = new LevelManager(this, new Position(0, 0), "BEGIN", 0, 0)
+    this.levelManager = new LevelManager(this, new Position(6, 0), "BEGIN", 0, 0)
 
     this.assetsPreloaded = false;
     this.loadedImages = new Map();
@@ -78,9 +78,9 @@ class Game {
 
     // Keyboard events
     window.addEventListener("keydown", (e) => {
-      if (!this.keys[e.code]) {
-        this.keysPressed[e.code] = true; // Single press detection
-      }
+      // if (!this.keys[e.code]) {
+      //   this.keysPressed[e.code] = true; // Single press detection
+      // }
       this.keys[e.code] = true;
       if (this.handleKeyPress(e.code)) {
         e.preventDefault();
@@ -89,7 +89,7 @@ class Game {
 
     window.addEventListener("keyup", (e) => {
       this.keys[e.code] = false;
-      this.keysPressed[e.code] = false;
+      // this.keysPressed[e.code] = false;
       e.preventDefault();
 
       // if (e.code == "KeyR") {
@@ -156,21 +156,20 @@ class Game {
   
   // Handle key presses based on current scene
   handleKeyPress(keyCode) {
-    switch (this.scene) {
+    // switch (this.scene) {
       // case "world":
       //   if (!this.worldMap.handleInput(keyCode)) return false;
       //   break;
       // case "zone":
       //   if (!this.zoneMap.handleInput(keyCode)) return false;
       //   break;
-      case "level":
-        if (!this.levelManager.handleGameInput(keyCode)) return false;
-        break;
+      // case "level":
+      //   if (!this.levelManager.handleGameInput(keyCode)) return false;
+      //   break;
       // case "comic":
       //   if (!this.comic.handleInput(keyCode)) return false;
       //   break;
-    }
-
+    // }
     // this.requestRedraw();
   }
 

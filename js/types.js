@@ -1,11 +1,13 @@
 const THUNK = () => {};
 
+/** @typedef {"u" | "d" | "l" | "r"} Dir */
+
+/** @type {{UP: Dir, DOWN: Dir, LEFT: Dir, RIGHT: Dir}} */
 const Direction = {
   UP: "u",
   DOWN: "d",
   LEFT: "l",
   RIGHT: "r",
-  SLEEP: "s",
 };
 
 const oppositeDirection = (direction) => {
@@ -56,6 +58,7 @@ class Position {
     return strPosition(this.x, this.y);
   }
 
+  /** @type {Position} */
   clone() {
     return new Position(this.x, this.y);
   }
@@ -88,9 +91,25 @@ class Position {
     return this;
   }
 
-  scale(factor) {
-    this.x *= factor;
-    this.y *= factor;
+  scale(factorX, factorY = factorX) {
+    return this.clone().m_scale(factorX, factorY);
+  }
+
+  // MUTATE ADD
+  m_add(other) {
+    this.x += other.x;
+    this.y += other.y;
+
     return this;
   }
+
+  m_scale(factorX, factorY = factorX) {
+    this.x *= factorX;
+    this.y *= factorY;
+    return this;
+  }
+}
+
+function clamp(v, lo, hi) {
+  return Math.min(Math.max(v, lo), hi);
 }
