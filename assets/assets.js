@@ -5,6 +5,7 @@ const FONTS = [
 const ASSETS = {
   SPRITE: {
     GOLEM: "assets/img/lem.png",
+    ALTAR: "assets/img/altar.png",
   },
   STINK: "assets/img/icon.png",
 };

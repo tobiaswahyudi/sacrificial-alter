@@ -11,9 +11,9 @@ const PLAYER_BOTTOM = 1 - PLAYER_TOP - PLAYER_HEIGHT;
 
 const PLAYER_TOP_LEFT = new Position(PLAYER_LEFT, PLAYER_TOP).scale(TILE_SIZE);
 
-const PLAYER_CENTER = new Position(PLAYER_LEFT, PLAYER_TOP).m_add(
-  new Position(PLAYER_WIDTH, PLAYER_HEIGHT).scale(0.5),
-).scale(TILE_SIZE);
+const PLAYER_CENTER = new Position(PLAYER_LEFT, PLAYER_TOP)
+  .m_add(new Position(PLAYER_WIDTH, PLAYER_HEIGHT).scale(0.5))
+  .scale(TILE_SIZE);
 
 const MOVE_ACCEL = 0.1;
 const MOVE_SPEED = 2;
@@ -135,6 +135,10 @@ class LevelManager {
         switch (tile) {
           case "#": {
             this.tiles.push(WallTile(r, c));
+            break;
+          }
+          case "@": {
+            this.tiles.push(AltarTile(r, c));
             break;
           }
         }
@@ -263,7 +267,10 @@ class LevelManager {
   // Level Input Handling
   applyInput() {
     // Jump
-    if ((this.game.keys["ArrowUp"] || this.game.keys["Space"]) && this.onGround) {
+    if (
+      (this.game.keys["ArrowUp"] || this.game.keys["Space"]) &&
+      this.onGround
+    ) {
       this.playerVel.y = -JUMP_SPEED;
       this.onGround = false;
     }
@@ -298,16 +305,29 @@ class LevelManager {
 
     // Tiles
     this.tiles.forEach((tile) => {
-      if (tile.type == "wall") {
-        this.game.drawRect(
-          tile.c * TILE_SIZE,
-          tile.r * TILE_SIZE,
-          TILE_SIZE,
-          TILE_SIZE,
-          {
-            fill: "#241308",
-          },
-        );
+      switch (tile.type) {
+        case "wall": {
+          this.game.drawRect(
+            tile.c * TILE_SIZE,
+            tile.r * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE,
+            {
+              fill: "#241308",
+            },
+          );
+          break;
+        }
+        case "altar": {
+          this.game.drawImage(
+            ASSETS.SPRITE.ALTAR,
+            tile.c * TILE_SIZE,
+            tile.r * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+          break;
+        }
       }
     });
 
@@ -375,18 +395,18 @@ class LevelManager {
     const [pRow, pCol] = this.getRowCol(this.player.add(PLAYER_CENTER));
     // Remember there are 2 extra rows and cols on the border.
     if (pCol == TILE_COLS + 1) {
-      this.player.x -= (TILE_COLS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.player.x -= TILE_COLS * TILE_SIZE - SCREEN_TRANSITION_NUDGE;
       this.transitionToLevel(this.srow, this.scol + 1);
     } else if (pCol == 0) {
-      this.player.x += (TILE_COLS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.player.x += TILE_COLS * TILE_SIZE - SCREEN_TRANSITION_NUDGE;
       this.transitionToLevel(this.srow, this.scol - 1);
     }
 
     if (pRow == TILE_ROWS + 1) {
-      this.player.y -= (TILE_ROWS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.player.y -= TILE_ROWS * TILE_SIZE - SCREEN_TRANSITION_NUDGE;
       this.transitionToLevel(this.srow + 1, this.scol);
     } else if (pRow == 0) {
-      this.player.y += (TILE_ROWS * TILE_SIZE - SCREEN_TRANSITION_NUDGE);
+      this.player.y += TILE_ROWS * TILE_SIZE - SCREEN_TRANSITION_NUDGE;
       this.transitionToLevel(this.srow - 1, this.scol);
     }
   }
