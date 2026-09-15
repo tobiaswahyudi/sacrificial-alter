@@ -310,40 +310,7 @@ class LevelManager {
 
     // Tiles
     this.tiles.forEach((tile) => {
-      switch (tile.type) {
-        case TILE_TYPE_WALL: {
-          this.game.drawRect(
-            tile.c * TILE_SIZE,
-            tile.r * TILE_SIZE,
-            TILE_SIZE,
-            TILE_SIZE,
-            {
-              fill: "#241308",
-            },
-          );
-          break;
-        }
-        case TILE_TYPE_ALTAR: {
-          this.game.drawImage(
-            ASSETS.SPRITE.ALTAR,
-            tile.c * TILE_SIZE,
-            tile.r * TILE_SIZE,
-            TILE_SIZE,
-            TILE_SIZE,
-          );
-          break;
-        }
-        case TILE_TYPE_SIGN: {
-          this.game.drawImage(
-            ASSETS.SPRITE.SIGN,
-            tile.c * TILE_SIZE,
-            tile.r * TILE_SIZE,
-            TILE_SIZE,
-            TILE_SIZE,
-          );
-          break;
-        }
-      }
+      tile.render(this.game);
     });
 
     // Draw animations behind tiles & stuff
@@ -362,7 +329,11 @@ class LevelManager {
     if (currentTile?.type == TILE_TYPE_ALTAR) {
       // Draw Nineslice
       if (!this.altarPopup) {
-        this.altarPopup = this.makePopup(pRow, pCol, this.renderAltarPopup.bind(this));
+        this.altarPopup = this.makePopup(
+          pRow,
+          pCol,
+          this.renderAltarPopup.bind(this),
+        );
         this.animations.push(this.altarPopup);
       }
     } else {
@@ -374,7 +345,12 @@ class LevelManager {
     if (currentTile?.type == TILE_TYPE_SIGN) {
       // Draw Nineslice
       if (!this.signPopup) {
-        this.signPopup = this.makePopup(pRow, pCol, this.renderText.bind(this), currentTile.text);
+        this.signPopup = this.makePopup(
+          pRow,
+          pCol,
+          this.renderText.bind(this),
+          currentTile.text,
+        );
         this.animations.push(this.signPopup);
       }
     } else {
