@@ -89,6 +89,7 @@ class LevelManager {
     this.juiceOffset = new Position(0, 0);
 
     this.altarPopup = undefined;
+    this.signPopup = undefined;
 
     this.transitionToLevel(srow, scol);
   }
@@ -143,6 +144,11 @@ class LevelManager {
           case "@": {
             this.tiles.push(AltarTile(r, c));
             break;
+          }
+          default: {
+            if (tile in MAP_SIGNS) {
+              this.tiles.push(SignTile(r, c, MAP_SIGNS[tile]));
+            }
           }
         }
       }
@@ -262,6 +268,33 @@ class LevelManager {
     };
   }
 
+  renderText(hMid, vMid, text) {
+    return () => {
+      this.game.drawText(text, hMid, vMid - 12, {
+        color: "#ce1b1b",
+        font: "500 14px Alkhemikal",
+        align: "center",
+      });
+    };
+  }
+
+  makePopup(row, col, renderContents, ...params) {
+    const hMid = (col + 0.5) * TILE_SIZE;
+    const vMid = (row - 2) * TILE_SIZE;
+    return new PopupAnimation(
+      112,
+      32,
+      hMid,
+      vMid,
+      false,
+      renderContents(hMid, vMid, ...params),
+      THUNK,
+      {
+        blocksInput: false,
+      },
+    );
+  }
+
   // Level Rendering
   renderGame() {
     const { width, height } = this.game;
@@ -300,6 +333,16 @@ class LevelManager {
           );
           break;
         }
+        case TILE_TYPE_SIGN: {
+          this.game.drawImage(
+            ASSETS.SPRITE.SIGN,
+            tile.c * TILE_SIZE,
+            tile.r * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE,
+          );
+          break;
+        }
       }
     });
 
@@ -319,26 +362,25 @@ class LevelManager {
     if (currentTile?.type == TILE_TYPE_ALTAR) {
       // Draw Nineslice
       if (!this.altarPopup) {
-        const hMid = (pCol + 0.5) * TILE_SIZE;
-        const vMid = (pRow - 2) * TILE_SIZE;
-        this.altarPopup = new PopupAnimation(
-          112,
-          32,
-          hMid,
-          vMid,
-          false,
-          this.renderAltarPopup(hMid, vMid),
-          THUNK,
-          {
-            blocksInput: false,
-          },
-        );
+        this.altarPopup = this.makePopup(pRow, pCol, this.renderAltarPopup.bind(this));
         this.animations.push(this.altarPopup);
       }
     } else {
       if (this.altarPopup) {
         this.altarPopup.needsInput = false;
         this.altarPopup = undefined;
+      }
+    }
+    if (currentTile?.type == TILE_TYPE_SIGN) {
+      // Draw Nineslice
+      if (!this.signPopup) {
+        this.signPopup = this.makePopup(pRow, pCol, this.renderText.bind(this), currentTile.text);
+        this.animations.push(this.signPopup);
+      }
+    } else {
+      if (this.signPopup) {
+        this.signPopup.needsInput = false;
+        this.signPopup = undefined;
       }
     }
 

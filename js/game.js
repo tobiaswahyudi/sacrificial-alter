@@ -21,7 +21,7 @@ class Game {
 
     // Input handling
     this.keys = {};
-    
+
     this.intents = {};
 
     // this.keysPressed = {}; // For single keypress detection
@@ -215,13 +215,13 @@ class Game {
     this.intents = {};
 
     Object.entries(this.keys).forEach(([k, v]) => {
-      if(!v) return;
+      if (!v) return;
       const mappedKey = this.rebindModal.keyMap[k];
-      if(!mappedKey) return;
-      const intent = this.rebindModal.binds[mappedKey]
-      if(!intent) return;
+      if (!mappedKey) return;
+      const intent = this.rebindModal.binds[mappedKey];
+      if (!intent) return;
       this.intents[intent] = true;
-    })
+    });
   }
 
   render() {
@@ -347,6 +347,9 @@ class Game {
       baseline = "top",
       lineSpacing = Number(font.match(/(\d+)px/)[1] || 16),
     } = options;
+
+    text = text.split("\n");
+    if (text.length == 1) text = text[0];
 
     if (typeof text === "object") {
       for (const line of text) {

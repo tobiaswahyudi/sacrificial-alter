@@ -6,6 +6,7 @@ const ASSETS = {
   SPRITE: {
     GOLEM: "assets/img/lem.png",
     ALTAR: "assets/img/altar.png",
+    SIGN: "assets/img/sign.png",
   },
   UI: {
     POPUP: "assets/ui/popup.png",
