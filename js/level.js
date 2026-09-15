@@ -280,8 +280,12 @@ class LevelManager {
 
     // Horizontal
     if (this.game.intents[Intent.RIGHT]) {
+      // If going opposite way, decay and then add speed
+      if(this.playerVel.x < 0) this.playerVel.x *= 0.5;
       this.playerVel.x += MOVE_ACCEL;
     } else if (this.game.intents[Intent.LEFT]) {
+      // If going opposite way, decay and then add speed
+      if(this.playerVel.x > 0) this.playerVel.x *= 0.5;
       this.playerVel.x -= MOVE_ACCEL;
     } else {
       this.playerVel.x *= 0.5;
