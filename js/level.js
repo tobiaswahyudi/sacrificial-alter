@@ -149,19 +149,6 @@ class LevelManager {
     }
   }
 
-  get playerBounds() {
-    const startPos = new Position(
-      this.player.x + PLAYER_LEFT * TILE_SIZE,
-      this.player.y + PLAYER_TOP * TILE_SIZE,
-    );
-    const size = new Position(
-      PLAYER_WIDTH * TILE_SIZE,
-      PLAYER_HEIGHT * TILE_SIZE,
-    );
-
-    return [startPos, startPos.clone().add(size)];
-  }
-
   applyGravity() {
     this.playerVel.y += GRAVITY;
     this.playerVel.y = Math.min(this.playerVel.y, MAX_FALL_SPEED);
@@ -182,10 +169,6 @@ class LevelManager {
     const wall = points
       .map(this.getRowCol)
       .find((x) => this.checkTileAtPoint(x) == "#");
-
-    // if (direction == Direction.DOWN) console.log(wall);
-
-    // console.log(points);
 
     if (!wall) return;
     limiter(wall, direction, offset, debugColor);
@@ -221,51 +204,6 @@ class LevelManager {
         break;
       }
     }
-  }
-
-  applyWallCollisions() {
-    const [pTopLeft, pBottomRight] = this.playerBounds;
-
-    // Check if player is standing on anything
-    const playerRow = Math.floor(this.player.y / TILE_SIZE + 0.5);
-
-    const playerLeftCol = Math.floor(this.player.x / TILE_SIZE);
-    const playerRightCol = Math.floor(this.player.x / TILE_SIZE + 1.1);
-
-    let standOnTile = undefined;
-    if (
-      this.map[playerRow + 1][playerLeftCol] == "#" ||
-      this.map[playerRow + 1][playerRightCol] == "#"
-    ) {
-      // There is a tile right below me - prevent me falling lower than its top surface
-      const topSurfaceWithPlayerHeight =
-        (playerRow + 1 - PLAYER_HEIGHT - PLAYER_TOP) * TILE_SIZE;
-      if (this.player.y > topSurfaceWithPlayerHeight) {
-        // clip player to top of surface
-        this.player.y = topSurfaceWithPlayerHeight;
-        standOnTile = true;
-      }
-    }
-
-    if (standOnTile) {
-      this.playerVel.y = 0;
-      this.onGround = true;
-    } else {
-      this.onGround = false;
-    }
-
-    // console.log(pTopLeft.x, playerLeftCol, this.map[playerRow][playerLeftCol]);
-
-    // if (this.map[playerRow][playerLeftCol] == "#") {
-    //   // There is a tile directly left - prevent me going smaller than its right edge
-    //   const rightSurfaceWithPlayerLeft =
-    //     (playerLeftCol + 1) * TILE_SIZE - PLAYER_LEFT;
-
-    //   if (this.player.x < rightSurfaceWithPlayerLeft) {
-    //     // clip player to right of surface
-    //     this.player.x = rightSurfaceWithPlayerLeft;
-    //   }
-    // }
   }
 
   // Level Input Handling
