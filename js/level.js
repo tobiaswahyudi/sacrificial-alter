@@ -27,6 +27,18 @@ const EPSILON = 1;
 
 const SCREEN_TRANSITION_NUDGE = 4;
 
+// Respawn
+
+const RESPAWN_SHAKE_FRAMES = 60;
+const RESPAWN_SHAKE_MAGNITUDE = 0.4 * TILE_SIZE;
+
+const RESPAWN_GIBLET_COUNT = 12;
+const RESPAWN_GIBLET_FRAMES = 120;
+
+const RESPAWN_MS = 720;
+
+// Collisions
+
 const PLAYER_COLLISION_CHECKPOINT_BEHIND = -0.4;
 const PLAYER_COLLISION_CHECKPOINT_AFTER = 1.4;
 const PLAYER_COLLISION_CHECKPOINT_NEAR = 0.2;
@@ -90,6 +102,17 @@ class LevelManager {
 
     this.altarPopup = undefined;
     this.signPopup = undefined;
+
+    this.lastAltar = {
+      sr: srow,
+      sc: scol,
+      row: playerPos.y,
+      col: playerPos.x,
+    };
+
+    this.acceptsInput = true;
+    this.isRespawning = false;
+    this.playerJuice = new Position();
 
     this.transitionToLevel(srow, scol);
   }
@@ -219,6 +242,7 @@ class LevelManager {
   // Level Input Handling
   handleInput() {
     if (this.game.rebindModal.open) return;
+    if (!this.acceptsInput) return;
 
     // Jump
     if (this.game.intents[Intent.JUMP] && this.onGround) {
@@ -241,7 +265,65 @@ class LevelManager {
 
     // Interact
     if (this.game.keys["KeyE"] && this.altarPopup) {
+      const [pRow, pCol] = this.getRowCol(this.player.add(PLAYER_CENTER));
+
+      this.lastAltar = {
+        sr: this.srow,
+        sc: this.scol,
+        row: pRow,
+        col: pCol,
+      };
       this.game.rebindModal.show();
+    }
+
+    // Restart
+    if (this.game.keys["KeyR"]) {
+      this.acceptsInput = false;
+
+      this.animations.push(
+        new JuiceAnimation(
+          this.playerJuice,
+          RESPAWN_SHAKE_FRAMES,
+          RESPAWN_SHAKE_MAGNITUDE,
+          {
+            taperFunction: INVERSE_TAPER_FUNCTION,
+            callback: () => {
+              this.isRespawning = true;
+              for (let i = 0; i < RESPAWN_GIBLET_COUNT; i++) {
+                const whichGiblet = Math.floor(4 * Math.random());
+                const vel = new Position(
+                  maybeFlip(randomRange(5, 20)),
+                  randomRange(-20, 5),
+                ).scale(0.3, 0.5);
+                const size = randomRange(8, 18);
+                this.animations.push(
+                  new ParticleAnimation(
+                    RESPAWN_GIBLET_FRAMES,
+                    this.player.add(PLAYER_CENTER),
+                    vel,
+                    ASSETS.SPRITE.GIBLETS[whichGiblet],
+                    size,
+                    {
+                      gravity: new Position(0, GRAVITY),
+                      shrink: 0.15,
+                    },
+                  ),
+                );
+              }
+
+              setTimeout(() => {
+                this.acceptsInput = true;
+                this.isRespawning = false;
+                this.transitionToLevel(this.lastAltar.sr, this.lastAltar.sc);
+                this.player = new Position(
+                  this.lastAltar.col,
+                  this.lastAltar.row,
+                ).scale(TILE_SIZE);
+              }, RESPAWN_MS);
+            },
+          },
+        ),
+      );
     }
 
     this.playerVel.x = clamp(this.playerVel.x, -MOVE_SPEED, MOVE_SPEED);
@@ -304,11 +386,6 @@ class LevelManager {
     const { width, height } = this.game;
     const [pRow, pCol] = this.getRowCol(this.player.add(PLAYER_CENTER));
 
-    this.applyGravity();
-    this.handleInput();
-    this.applyVelocity();
-    // this.applyWallCollisions();
-
     // Game area background
     this.game.drawRect(0, 0, width, height, { fill: "#521d1d" });
 
@@ -320,13 +397,22 @@ class LevelManager {
     // Draw animations behind tiles & stuff
     this.animations.tick();
 
-    this.game.drawImage(
-      ASSETS.SPRITE.GOLEM,
-      this.player.x,
-      this.player.y,
-      TILE_SIZE,
-      TILE_SIZE,
-    );
+    this.handleInput();
+    if (this.acceptsInput) {
+      this.applyGravity();
+      this.applyVelocity();
+    }
+    // this.applyWallCollisions();
+
+    if (!this.isRespawning) {
+      this.game.drawImage(
+        ASSETS.SPRITE.GOLEM,
+        this.player.x + this.playerJuice.x,
+        this.player.y + this.playerJuice.y,
+        TILE_SIZE,
+        TILE_SIZE,
+      );
+    }
 
     // Check Tile Interactions
     const currentTile = this.tiles.find((t) => t.r == pRow && t.c == pCol);
