@@ -145,6 +145,10 @@ class LevelManager {
             this.tiles.push(AltarTile(r, c));
             break;
           }
+          case "B": {
+            this.tiles.push(BrainTile(r, c));
+            break;
+          }
           default: {
             if (tile in MAP_SIGNS) {
               this.tiles.push(SignTile(r, c, MAP_SIGNS[tile]));

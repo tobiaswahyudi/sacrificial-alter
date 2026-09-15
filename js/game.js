@@ -22,6 +22,8 @@ class Game {
     // Input handling
     this.keys = {};
 
+    this.frame = 0;
+
     this.intents = {};
 
     // this.keysPressed = {}; // For single keypress detection
@@ -227,6 +229,9 @@ class Game {
   render() {
     if (!this.assetsPreloaded) return;
     if (!this.fontsLoaded) return;
+
+    this.frame = this.frame % (1<<30);
+    this.frame++;
 
     // Clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
