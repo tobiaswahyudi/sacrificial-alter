@@ -6,7 +6,7 @@ const WallTile = (r, c) => ({
   c,
   render: (game) => {
     game.drawRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE, {
-      fill: "#241308",
+      fill: "#220803",
     });
   },
 });
