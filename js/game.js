@@ -21,16 +21,32 @@ class Game {
 
     // Input handling
     this.keys = {};
+    
+    this.intents = {};
+
     // this.keysPressed = {}; // For single keypress detection
 
     // Initialize modules
     this.world = new WorldMap(this);
-    this.levelManager = new LevelManager(this, new Position(6, 1), "BEGIN", 0, 0)
+    this.levelManager = new LevelManager(
+      this,
+      new Position(6, 1),
+      "BEGIN",
+      0,
+      0,
+    );
 
     this.assetsPreloaded = false;
     this.loadedImages = new Map();
 
     this.fontsLoaded = false;
+
+    this.mouse = new Position();
+    this.mouseListeners = {};
+    this.exitClickListeners = [];
+    this.hoveredButton = undefined;
+
+    this.rebindModal = new RebindModal(this);
 
     this.init();
   }
@@ -100,17 +116,34 @@ class Game {
     });
 
     // Minimal mouse events (mainly for UI)
-    // this.canvas.addEventListener("mousemove", (e) => {
-    //   const rect = this.canvas.getBoundingClientRect();
-    //   this.mouse.x = e.clientX - rect.left;
-    //   this.mouse.y = e.clientY - rect.top;
-    // });
+    this.canvas.addEventListener("mousemove", (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = ((e.clientX - rect.left) / rect.width) * GAME_WIDTH;
+      this.mouse.y = ((e.clientY - rect.top) / rect.height) * GAME_HEIGHT;
 
-    // this.canvas.addEventListener("click", (e) => {
-    //   this.mouse.clicked = true;
-    //   this.handleMouseClick(this.mouse.x, this.mouse.y);
-    //   e.preventDefault();
-    // });
+      this.hoveredButton = undefined;
+      Object.values(this.mouseListeners).forEach((btn) => {
+        btn.hovered = false;
+        if (
+          btn.x <= this.mouse.x &&
+          btn.y <= this.mouse.y &&
+          btn.x + btn.width >= this.mouse.x &&
+          btn.y + btn.height >= this.mouse.y
+        ) {
+          btn.hovered = true;
+          this.hoveredButton = btn;
+        }
+      });
+    });
+
+    this.canvas.addEventListener("click", (e) => {
+      // this.handleMouseClick(this.mouse.x, this.mouse.y);
+      if (this.hoveredButton) this.hoveredButton.clickCallback(this.mouse);
+      else this.exitClickListeners.forEach((cb) => cb());
+      console.log(this.mouse);
+
+      e.preventDefault();
+    });
 
     // Prevent context menu
     this.canvas.addEventListener("contextmenu", (e) => {
@@ -153,22 +186,22 @@ class Game {
       this.renderLoop();
     }, TARGET_RENDER_MS);
   }
-  
+
   // Handle key presses based on current scene
   handleKeyPress(keyCode) {
     // switch (this.scene) {
-      // case "world":
-      //   if (!this.worldMap.handleInput(keyCode)) return false;
-      //   break;
-      // case "zone":
-      //   if (!this.zoneMap.handleInput(keyCode)) return false;
-      //   break;
-      // case "level":
-      //   if (!this.levelManager.handleGameInput(keyCode)) return false;
-      //   break;
-      // case "comic":
-      //   if (!this.comic.handleInput(keyCode)) return false;
-      //   break;
+    // case "world":
+    //   if (!this.worldMap.handleInput(keyCode)) return false;
+    //   break;
+    // case "zone":
+    //   if (!this.zoneMap.handleInput(keyCode)) return false;
+    //   break;
+    // case "level":
+    //   if (!this.levelManager.handleGameInput(keyCode)) return false;
+    //   break;
+    // case "comic":
+    //   if (!this.comic.handleInput(keyCode)) return false;
+    //   break;
     // }
     // this.requestRedraw();
   }
@@ -178,12 +211,27 @@ class Game {
     // this.requestRedraw();
   }
 
+  computeIntents() {
+    this.intents = {};
+
+    Object.entries(this.keys).forEach(([k, v]) => {
+      if(!v) return;
+      const mappedKey = this.rebindModal.keyMap[k];
+      if(!mappedKey) return;
+      const intent = this.rebindModal.binds[mappedKey]
+      if(!intent) return;
+      this.intents[intent] = true;
+    })
+  }
+
   render() {
     if (!this.assetsPreloaded) return;
     if (!this.fontsLoaded) return;
 
     // Clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
+
+    this.computeIntents();
 
     // Set default styles
     this.ctx.fillStyle = "#fff";
@@ -194,6 +242,9 @@ class Game {
     switch (this.scene) {
       case "level":
         this.levelManager.renderGame(this.ctx);
+
+        // Render modal
+        this.rebindModal.render();
         break;
     }
   }

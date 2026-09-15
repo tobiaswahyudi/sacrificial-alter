@@ -8,7 +8,9 @@ const ASSETS = {
     ALTAR: "assets/img/altar.png",
   },
   UI: {
-    POPUP: "assets/ui/popup.png"
+    POPUP: "assets/ui/popup.png",
+    KEYBOARD: "assets/ui/bind.png",
+    ANATOMY: "assets/ui/anatom.png",
   },
   STINK: "assets/img/icon.png",
 };

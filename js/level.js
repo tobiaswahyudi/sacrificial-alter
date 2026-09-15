@@ -17,6 +17,7 @@ const PLAYER_CENTER = new Position(PLAYER_LEFT, PLAYER_TOP)
 
 const MOVE_ACCEL = 0.1;
 const MOVE_SPEED = 2;
+const MAX_FALL_SPEED = 6.4;
 
 const GRAVITY = 0.15;
 
@@ -163,6 +164,7 @@ class LevelManager {
 
   applyGravity() {
     this.playerVel.y += GRAVITY;
+    this.playerVel.y = Math.min(this.playerVel.y, MAX_FALL_SPEED);
   }
 
   getRowCol(pt) {
@@ -268,22 +270,26 @@ class LevelManager {
 
   // Level Input Handling
   applyInput() {
+    if (this.game.rebindModal.open) return;
+
     // Jump
-    if (
-      (this.game.keys["ArrowUp"] || this.game.keys["Space"]) &&
-      this.onGround
-    ) {
+    if (this.game.intents[Intent.JUMP] && this.onGround) {
       this.playerVel.y = -JUMP_SPEED;
       this.onGround = false;
     }
 
     // Horizontal
-    if (this.game.keys["ArrowRight"] || this.game.keys["KeyD"]) {
+    if (this.game.intents[Intent.RIGHT]) {
       this.playerVel.x += MOVE_ACCEL;
-    } else if (this.game.keys["ArrowLeft"] || this.game.keys["KeyA"]) {
+    } else if (this.game.intents[Intent.LEFT]) {
       this.playerVel.x -= MOVE_ACCEL;
     } else {
       this.playerVel.x *= 0.5;
+    }
+
+    // Interact
+    if (this.game.keys["KeyE"] && this.altarPopup) {
+      this.game.rebindModal.show();
     }
 
     this.playerVel.x = clamp(this.playerVel.x, -MOVE_SPEED, MOVE_SPEED);
@@ -325,7 +331,7 @@ class LevelManager {
     // this.applyWallCollisions();
 
     // Game area background
-    this.game.drawRect(0, 0, width, height, { fill: "#4b0f0f" });
+    this.game.drawRect(0, 0, width, height, { fill: "#521d1d" });
 
     // Tiles
     this.tiles.forEach((tile) => {

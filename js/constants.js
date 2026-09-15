@@ -1,7 +1,9 @@
 const TILE_ROWS = 12;
 const TILE_COLS = 16;
 
-const TILE_SIZE = 32
+const TILE_SIZE = 32;
 
+// GAME_HEIGHT: 448
 const GAME_WIDTH = TILE_SIZE * (TILE_COLS + 2);
+//GAME_WIDTH: 576
 const GAME_HEIGHT = TILE_SIZE * (TILE_ROWS + 2);
