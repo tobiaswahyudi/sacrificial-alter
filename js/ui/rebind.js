@@ -29,6 +29,22 @@ const intentButtonHoverParams = {
   fontSize: 10,
 };
 
+let MAPPED_KEYS_UNLOCKABLE = [
+  {
+    key: MappedKey.JUMP,
+    obj: {
+      x: 0,
+      y: -40,
+      text: "W",
+    },
+  },
+];
+
+const REBIND_MAPPED_KEYS_DISPLAY_CENTER = new Position(
+  REBIND_LEFT + 72,
+  REBIND_TOP + 128,
+);
+
 class RebindModal {
   constructor(game) {
     this.game = game;
@@ -39,19 +55,14 @@ class RebindModal {
     this.selection = undefined;
 
     this.mappedKeyButtonParams = {
-      // [MappedKey.JUMP]: {
-      //   x: REBIND_LEFT + 72,
-      //   y: REBIND_TOP + 88,
-      //   text: "W",
-      // },
       [MappedKey.LEFT]: {
-        x: REBIND_LEFT + 36,
-        y: REBIND_TOP + 128,
+        x: -36,
+        y: 0,
         text: "A",
       },
       [MappedKey.RIGHT]: {
-        x: REBIND_LEFT + 108,
-        y: REBIND_TOP + 128,
+        x: 32,
+        y: 0,
         text: "D",
       },
     };
@@ -71,19 +82,6 @@ class RebindModal {
       },
       [Intent.LEFT]: { x: 410, width: 64, y: 245, height: 24, text: "go left" },
       [Intent.JUMP]: { x: 360, width: 48, y: 215, height: 24, text: "jump" },
-    };
-
-    const makeMapKeyButton = ([key, btn]) => {
-      return new Button(game, {
-        x: btn.x - 16,
-        width: 32,
-        y: btn.y - 16,
-        height: 32,
-        text: btn.text,
-        clickCallback: () => {
-          this.selection = key;
-        },
-      });
     };
 
     const makeIntentButton = ([key, btn]) => {
@@ -116,18 +114,21 @@ class RebindModal {
           this.open = false;
         },
       }),
-      ...Object.entries(this.mappedKeyButtonParams).map(makeMapKeyButton),
       ...Object.entries(this.intentButtonParams).map(makeIntentButton),
     ];
 
-    this.keyMap = {
-      ArrowUp: MappedKey.JUMP,
-      Space: MappedKey.JUMP,
-      ArrowRight: MappedKey.RIGHT,
-      KeyD: MappedKey.RIGHT,
-      ArrowLeft: MappedKey.LEFT,
-      KeyA: MappedKey.LEFT,
-    };
+    (Object.entries(this.mappedKeyButtonParams).forEach(
+      this.makeMapKeyButton.bind(this),
+    ),
+      (this.keyMap = {
+        ArrowUp: MappedKey.JUMP,
+        KeyW: MappedKey.JUMP,
+        Space: MappedKey.JUMP,
+        ArrowRight: MappedKey.RIGHT,
+        KeyD: MappedKey.RIGHT,
+        ArrowLeft: MappedKey.LEFT,
+        KeyA: MappedKey.LEFT,
+      }));
 
     this.waypoints = {
       [MappedKey.JUMP]: new Position(280, 200),
@@ -141,6 +142,23 @@ class RebindModal {
       // [MappedKey.JUMP]: Intent.JUMP,
     };
   }
+
+  makeMapKeyButton([key, btn]) {
+    const button = new Button(this.game, {
+      x: btn.x - 16 + REBIND_MAPPED_KEYS_DISPLAY_CENTER.x,
+      width: 32,
+      y: btn.y - 16 + REBIND_MAPPED_KEYS_DISPLAY_CENTER.y,
+      height: 32,
+      text: btn.text,
+      clickCallback: () => {
+        this.selection = key;
+      },
+    });
+
+    this.buttons.push(button);
+  }
+
+  remakeButtons() {}
 
   show() {
     this.open = true;
@@ -168,8 +186,10 @@ class RebindModal {
     );
 
     Object.entries(this.binds).forEach(([mk, i], idx) => {
-      if(mk == this.selection) return;
-      const mkPos = this.mappedKeyButtonParams[mk];
+      if (mk == this.selection) return;
+      const mkPos = REBIND_MAPPED_KEYS_DISPLAY_CENTER.add(
+        this.mappedKeyButtonParams[mk],
+      );
       const waypoint = this.waypoints[mk];
       const iPos = this.intentButtonParams[i];
 
@@ -182,13 +202,15 @@ class RebindModal {
         stroke: `hsl(${20 + idx * 20}, 100%, 50%)`,
         strokeWidth: 1,
         filled: false,
-        fill: undefined
+        fill: undefined,
       });
     });
 
-    if(this.selection) {
-      const mkPos = this.mappedKeyButtonParams[this.selection];
-      
+    if (this.selection) {
+      const mkPos = REBIND_MAPPED_KEYS_DISPLAY_CENTER.add(
+        this.mappedKeyButtonParams[this.selection],
+      );
+
       const line = new Path2D();
       line.moveTo(mkPos.x, mkPos.y);
       line.lineTo(this.game.mouse.x, this.game.mouse.y);
@@ -197,9 +219,9 @@ class RebindModal {
         stroke: `hsl(0, 100%, 50%)`,
         strokeWidth: 3,
         filled: false,
-        fill: undefined
+        fill: undefined,
       });
-    };
+    }
 
     this.buttons.forEach((btn) => btn.render());
   }

@@ -37,6 +37,14 @@ const RESPAWN_GIBLET_FRAMES = 120;
 
 const RESPAWN_MS = 720;
 
+// Got Brain Anim
+
+const GETBRAIN_BACKGROUND_FRAMES = 80;
+const GETBRAIN_BACKGROUND_X = GAME_WIDTH / 2;
+const GETBRAIN_BACKGROUND_Y = 140;
+const GETBRAIN_BACKGROUND_SIZE = 256;
+const GETBRAIN_BACKGROUND_BLUR = 20;
+
 // Collisions
 
 const PLAYER_COLLISION_CHECKPOINT_BEHIND = -0.4;
@@ -110,9 +118,13 @@ class LevelManager {
       col: playerPos.x,
     };
 
+    this.ethereals = [];
+
     this.acceptsInput = true;
     this.isRespawning = false;
     this.playerJuice = new Position();
+
+    this.buttonJuice = new Position();
 
     this.transitionToLevel(srow, scol);
   }
@@ -448,6 +460,101 @@ class LevelManager {
         this.signPopup.needsInput = false;
         this.signPopup = undefined;
       }
+    }
+    if (
+      currentTile?.type == TILE_TYPE_BRAIN &&
+      !this.game.gotBrains[currentTile.id]
+    ) {
+      // Get brain
+      this.game.gotBrains[currentTile.id] = true;
+
+      this.acceptsInput = false;
+
+      // Show ethereal popup
+      const etherealBrain = new EtherealIntroAnimation(
+        GETBRAIN_BACKGROUND_FRAMES,
+        GETBRAIN_BACKGROUND_X,
+        GETBRAIN_BACKGROUND_Y,
+        ASSETS.SPRITE.BRAIN,
+        GETBRAIN_BACKGROUND_SIZE,
+        GETBRAIN_BACKGROUND_SIZE,
+        {
+          startBlur: GETBRAIN_BACKGROUND_BLUR,
+          startScale: 0,
+          framesCallback: () => {
+            let spawnTheLastOne = false;
+
+            Object.values(this.game.rebindModal.mappedKeyButtonParams).map(
+              (mapKeyParam) => {
+                const mkAnim = new EtherealIntroAnimation(
+                  GETBRAIN_BACKGROUND_FRAMES,
+                  GETBRAIN_BACKGROUND_X + mapKeyParam.x,
+                  GETBRAIN_BACKGROUND_Y + mapKeyParam.y,
+                  ASSETS.SHAPE.SQUARE,
+                  32,
+                  32,
+                  {
+                    startBlur: GETBRAIN_BACKGROUND_BLUR,
+                    startScale: 0,
+                    needsInput: true,
+                    ...DEFAULT_DRAW_PARAMS,
+                    text: mapKeyParam.text,
+                    framesCallback: () => {
+                      if (spawnTheLastOne) return;
+                      spawnTheLastOne = true;
+
+                      const newMapkeyEntry = MAPPED_KEYS_UNLOCKABLE[0];
+                      MAPPED_KEYS_UNLOCKABLE = MAPPED_KEYS_UNLOCKABLE.splice(0);
+
+                      const newMapkey = newMapkeyEntry.obj
+
+                      this.game.rebindModal.mappedKeyButtonParams[newMapkeyEntry.key] =
+                        newMapkey;
+
+                      this.game.rebindModal.makeMapKeyButton([newMapkeyEntry.key, newMapkeyEntry.obj])
+
+                      this.animations.push(new JuiceAnimation(this.buttonJuice, GETBRAIN_BACKGROUND_FRAMES * 2, TILE_SIZE * 2));
+
+                      const lastAnim = new EtherealIntroAnimation(
+                        GETBRAIN_BACKGROUND_FRAMES * 2,
+                        GETBRAIN_BACKGROUND_X + newMapkey.x,
+                        GETBRAIN_BACKGROUND_Y + newMapkey.y,
+                        ASSETS.SHAPE.SQUARE,
+                        32,
+                        32,
+                        {
+                          startBlur: GETBRAIN_BACKGROUND_BLUR,
+                          startScale: 0,
+                          needsInput: true,
+                          ...DEFAULT_DRAW_PARAMS,
+                          text: newMapkey.text,
+                          framesCallback: () => {
+                            // Unwind all
+                            setTimeout(() => {
+                              this.ethereals.forEach(a => a.needsInput = false);
+                              this.acceptsInput = true;
+                            }, 500)
+                          },
+                          offset: this.buttonJuice
+                        },
+                      );
+
+                      this.animations.push(lastAnim);
+                      this.ethereals.push(lastAnim);
+                    },
+                  },
+                );
+
+                this.animations.push(mkAnim);
+                this.ethereals.push(mkAnim);
+              },
+            );
+          },
+          needsInput: true,
+        },
+      );
+      this.animations.push(etherealBrain);
+      this.ethereals.push(etherealBrain);
     }
 
     // Draw checkpointers

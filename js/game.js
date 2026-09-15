@@ -9,8 +9,10 @@ class Game {
     this.ctx = this.canvas.getContext("2d");
 
     // Game state
-    this.isRunning = false;
     // can't remember why I had this, but it seems correct
+    this.isRunning = false;
+
+    this.gotBrains = {};
 
     // Canvas dimensions
     this.width = GAME_WIDTH;
@@ -230,7 +232,7 @@ class Game {
     if (!this.assetsPreloaded) return;
     if (!this.fontsLoaded) return;
 
-    this.frame = this.frame % (1<<30);
+    this.frame = this.frame % (1 << 30);
     this.frame++;
 
     // Clear canvas
@@ -376,7 +378,8 @@ class Game {
   }
 
   drawRect(x, y, width, height, params = {}) {
-    const { fill, stroke, strokeWidth, filled } = this.getDrawParams(params);
+    const { fill, stroke, strokeWidth, filled, text, ...options } =
+      this.getDrawParams(params);
 
     this.ctx.strokeStyle = stroke;
     this.ctx.fillStyle = fill;
@@ -384,6 +387,15 @@ class Game {
 
     if (filled) this.ctx.fillRect(x, y, width, height);
     if (strokeWidth) this.ctx.strokeRect(x, y, width, height);
+
+    if (text) {
+      this.drawText(
+        text,
+        x + width / 2,
+        y + height / 2 - options?.fontSize / 2 || 7,
+        options,
+      );
+    }
   }
 
   drawPath(path, params = {}) {

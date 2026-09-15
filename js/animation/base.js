@@ -7,7 +7,7 @@ const DEFAULT_ANIMATION_OPTIONS = {
 
 const getAnimationOptions = (opts = {}) => ({
   ...DEFAULT_ANIMATION_OPTIONS,
-  ...opts
+  ...opts,
 });
 
 const AnimationType = {
@@ -27,8 +27,9 @@ class GSAnimation {
       return true;
     },
     callback = () => {},
+    framesCallback = () => {},
     absoluteSize = false,
-    layer = 0
+    layer = 0,
   }) {
     this.frame = 0;
     this.frames = frames;
@@ -37,6 +38,7 @@ class GSAnimation {
     this.render = render;
     this.inputHandler = handleInput;
     this.callback = callback;
+    this.framesCallback = framesCallback;
     this.absoluteSize = absoluteSize;
     this.layer = layer;
 
@@ -48,10 +50,11 @@ class GSAnimation {
     if (this.finished) {
       return;
     }
-    if (this.frame < this.frames) {
+    if (this.frame <= this.frames) {
       this.frame++;
     }
     this.render(game, this.frame);
+    if (this.frame == this.frames && this.framesCallback) this.framesCallback();
     if (this.frame >= this.frames && !this.needsInput) {
       if (this.callback) this.callback();
       this.finished = true;

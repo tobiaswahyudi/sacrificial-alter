@@ -6,6 +6,7 @@ const INVERSE_TAPER_FUNCTION = (frames) => (frame) => frame / frames;
 const JUICE_RENDER = (juice, frames, magnitude, fn = TAPER_FUNCTION) => {
   const frameTaper = fn(frames);
   return (game, frame) => {
+
     juice
       .zero()
       .randomize()

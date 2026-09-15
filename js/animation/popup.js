@@ -185,8 +185,6 @@ class PopupAnimation extends GSAnimation {
       return this.frame >= this.frames;
     };
 
-    console.log(Math.ceil((width + height) * POPUP_FRAMES_PER_PX))
-
     super({
       frames: Math.ceil((width + height) * POPUP_FRAMES_PER_PX),
       render: RENDER_POPUP(width, height, hMid, vMid, showBackground, renderContents, overrides.opacity ?? 1),
