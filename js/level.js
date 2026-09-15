@@ -307,7 +307,7 @@ class LevelManager {
         align: "center",
       });
 
-      this.game.drawText("REMAKE THYSELF", hMid, vMid - 12, {
+      this.game.drawText("UNBIND THYSELF", hMid, vMid - 12, {
         color: "#ce1b1b",
         font: "500 18px Alkhemikal",
         align: "center",

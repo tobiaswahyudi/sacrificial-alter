@@ -111,7 +111,7 @@ class RebindModal {
         width: 140,
         y: REBIND_TOP + 280,
         height: 32,
-        text: "I AM COMPLETE",
+        text: "I AM PERFECT",
         clickCallback: () => {
           this.open = false;
         },
