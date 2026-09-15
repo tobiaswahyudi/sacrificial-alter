@@ -170,6 +170,7 @@ class LevelManager {
       .map(this.getRowCol)
       .find((x) => this.checkTileAtPoint(x) == "#");
 
+    if (direction == Direction.DOWN) this.onGround = false;
     if (!wall) return;
     limiter(wall, direction, offset, debugColor);
   }
@@ -196,7 +197,6 @@ class LevelManager {
         if (this.player.y > topLimit) {
           this.player.y = topLimit;
           if (this.playerVel.y >= 0) {
-            // console.log("grounded");
             this.onGround = true;
           }
           this.playerVel.y = 0;
@@ -219,11 +219,11 @@ class LevelManager {
     // Horizontal
     if (this.game.intents[Intent.RIGHT]) {
       // If going opposite way, decay and then add speed
-      if(this.playerVel.x < 0) this.playerVel.x *= 0.5;
+      if (this.playerVel.x < 0) this.playerVel.x *= 0.5;
       this.playerVel.x += MOVE_ACCEL;
     } else if (this.game.intents[Intent.LEFT]) {
       // If going opposite way, decay and then add speed
-      if(this.playerVel.x > 0) this.playerVel.x *= 0.5;
+      if (this.playerVel.x > 0) this.playerVel.x *= 0.5;
       this.playerVel.x -= MOVE_ACCEL;
     } else {
       this.playerVel.x *= 0.5;
