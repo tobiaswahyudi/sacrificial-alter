@@ -17,7 +17,7 @@ const PLAYER_CENTER = new Position(PLAYER_LEFT, PLAYER_TOP)
 
 const MOVE_ACCEL = 0.1;
 const MOVE_SPEED = 2;
-const MAX_FALL_SPEED = 6.4;
+const MAX_FALL_SPEED = 4.4;
 
 const GRAVITY = 0.15;
 
