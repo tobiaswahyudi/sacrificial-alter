@@ -217,7 +217,7 @@ class LevelManager {
   }
 
   // Level Input Handling
-  applyInput() {
+  handleInput() {
     if (this.game.rebindModal.open) return;
 
     // Jump
@@ -305,7 +305,7 @@ class LevelManager {
     const [pRow, pCol] = this.getRowCol(this.player.add(PLAYER_CENTER));
 
     this.applyGravity();
-    this.applyInput();
+    this.handleInput();
     this.applyVelocity();
     // this.applyWallCollisions();
 
