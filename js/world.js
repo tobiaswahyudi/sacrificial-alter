@@ -19,7 +19,7 @@ class WorldMap {
       }
     }
 
-    console.log(this.screens)
+    // console.log(this.screens)
 
     str.forEach((line, rIdx) => {
       const row = Math.floor(rIdx / ySize);

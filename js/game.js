@@ -142,7 +142,7 @@ class Game {
       // this.handleMouseClick(this.mouse.x, this.mouse.y);
       if (this.hoveredButton) this.hoveredButton.clickCallback(this.mouse);
       else this.exitClickListeners.forEach((cb) => cb());
-      console.log(this.mouse);
+      // console.log(this.mouse);
 
       e.preventDefault();
     });
