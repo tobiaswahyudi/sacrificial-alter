@@ -18,6 +18,9 @@ const ASSETS = {
     KEYBOARD: "assets/ui/bind.png",
     ANATOMY: "assets/ui/anatom.png",
   },
+  EFFECTS: {
+    GLOW: "assets/img/glow.png",
+  },
   STINK: "assets/img/icon.png",
   // Constants! So we can use shapes as images!
   SHAPE: {
