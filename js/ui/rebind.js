@@ -206,6 +206,8 @@ class RebindModal {
       });
     });
 
+    this.buttons.forEach((btn) => btn.render());
+    
     if (this.selection) {
       const mkPos = REBIND_MAPPED_KEYS_DISPLAY_CENTER.add(
         this.mappedKeyButtonParams[this.selection],
@@ -223,6 +225,5 @@ class RebindModal {
       });
     }
 
-    this.buttons.forEach((btn) => btn.render());
   }
 }
