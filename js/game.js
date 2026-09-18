@@ -13,6 +13,7 @@ class Game {
     this.isRunning = false;
 
     this.gotBrains = {};
+    this.gotModules = {};
 
     // Canvas dimensions
     this.width = GAME_WIDTH;

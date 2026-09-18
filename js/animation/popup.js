@@ -4,9 +4,22 @@ const POPUP_NINESLICE_SIZE = 64;
 
 const POPUP_CORNER_SIZE = 24;
 
-const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents, opacity) => {
-  const VERTICAL_FRAMES = height * POPUP_FRAMES_PER_PX;
-  const HORIZONTAL_FRAMES = width * POPUP_FRAMES_PER_PX;
+const RENDER_POPUP = (
+  width,
+  height,
+  hMid,
+  vMid,
+  showBackground,
+  renderContents,
+  opacity,
+  overrides,
+) => {
+  const speedMult = overrides.speedMult || 1;
+  const clipContents = !!overrides.clipContents;
+
+  const VERTICAL_FRAMES = (height * POPUP_FRAMES_PER_PX) / speedMult;
+  const HORIZONTAL_FRAMES = (width * POPUP_FRAMES_PER_PX) / speedMult;
+
   return (game, frame) => {
     let left = 0;
     let top = 0;
@@ -50,7 +63,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: 0,
         width: POPUP_CORNER_SLICE_SIZE,
         height: POPUP_CORNER_SLICE_SIZE,
-      }
+      },
     );
     game.drawImage(
       ASSETS.UI.POPUP,
@@ -63,7 +76,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: 0,
         width: POPUP_CORNER_SLICE_SIZE,
         height: POPUP_CORNER_SLICE_SIZE,
-      }
+      },
     );
     game.drawImage(
       ASSETS.UI.POPUP,
@@ -76,7 +89,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE,
         width: POPUP_CORNER_SLICE_SIZE,
         height: POPUP_CORNER_SLICE_SIZE,
-      }
+      },
     );
     game.drawImage(
       ASSETS.UI.POPUP,
@@ -89,7 +102,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE,
         width: POPUP_CORNER_SLICE_SIZE,
         height: POPUP_CORNER_SLICE_SIZE,
-      }
+      },
     );
     // draw center
     game.drawImage(
@@ -103,7 +116,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: POPUP_CORNER_SLICE_SIZE,
         width: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE * 2,
         height: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE * 2,
-      }
+      },
     );
     // draw edges
     game.drawImage(
@@ -117,7 +130,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: 0,
         width: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE * 2,
         height: POPUP_CORNER_SLICE_SIZE,
-      }
+      },
     );
     game.drawImage(
       ASSETS.UI.POPUP,
@@ -130,7 +143,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE,
         width: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE * 2,
         height: POPUP_CORNER_SLICE_SIZE,
-      }
+      },
     );
     game.drawImage(
       ASSETS.UI.POPUP,
@@ -143,7 +156,7 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: POPUP_CORNER_SLICE_SIZE,
         width: POPUP_CORNER_SLICE_SIZE,
         height: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE * 2,
-      }
+      },
     );
     game.drawImage(
       ASSETS.UI.POPUP,
@@ -156,23 +169,24 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
         y: POPUP_CORNER_SLICE_SIZE,
         width: POPUP_CORNER_SLICE_SIZE,
         height: POPUP_NINESLICE_SIZE - POPUP_CORNER_SLICE_SIZE * 2,
-      }
+      },
     );
 
     game.ctx.restore();
 
-    // const mask = new Path2D();
-
-    // mask.rect(
-    //   left + POPUP_CORNER_SIZE,
-    //   top + POPUP_CORNER_SIZE,
-    //   innerWidth,
-    //   innerHeight
-    // );
-
     if (renderContents) {
       game.ctx.save();
-      // game.ctx.clip(mask);
+      if (clipContents) {
+        const mask = new Path2D();
+
+        mask.rect(
+          left + POPUP_CORNER_SIZE,
+          top + POPUP_CORNER_SIZE,
+          innerWidth,
+          innerHeight,
+        );
+        game.ctx.clip(mask);
+      }
       renderContents(game, frame);
       game.ctx.restore();
     }
@@ -180,20 +194,40 @@ const RENDER_POPUP = (width, height, hMid, vMid, showBackground, renderContents,
 };
 
 class PopupAnimation extends GSAnimation {
-  constructor(width, height, hMid, vMid, showBackground, renderContents, callback, overrides = {}) {
+  constructor(
+    width,
+    height,
+    hMid,
+    vMid,
+    showBackground,
+    renderContents,
+    callback,
+    overrides = {},
+  ) {
     const handleInput = () => {
       return this.frame >= this.frames;
     };
 
+    const speedMult = overrides.speedMult || 1;
+
     super({
-      frames: Math.ceil((width + height) * POPUP_FRAMES_PER_PX),
-      render: RENDER_POPUP(width, height, hMid, vMid, showBackground, renderContents, overrides.opacity ?? 1),
+      frames: Math.ceil((width + height) * POPUP_FRAMES_PER_PX) / speedMult,
+      render: RENDER_POPUP(
+        width,
+        height,
+        hMid,
+        vMid,
+        showBackground,
+        renderContents,
+        overrides.opacity ?? 1,
+        overrides,
+      ),
       blocksInput: true,
       needsInput: true,
       handleInput,
       callback,
       absoluteSize: true,
-      ...overrides
+      ...overrides,
     });
   }
 }

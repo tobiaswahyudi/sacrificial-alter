@@ -6,6 +6,7 @@ const ASSETS = {
     ALTAR: "assets/img/altar.png",
     BRAIN: "assets/img/brain.png",
     SIGN: "assets/img/sign.png",
+    MODULE: "assets/img/module.png",
     GIBLETS: {
       0: "assets/img/giblets/skin.png",
       1: "assets/img/giblets/bone.png",

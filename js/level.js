@@ -45,6 +45,9 @@ const GETBRAIN_BACKGROUND_Y = 140;
 const GETBRAIN_BACKGROUND_SIZE = 256;
 const GETBRAIN_BACKGROUND_BLUR = 20;
 
+// Got Module Anim
+const MODULE_PARTICLE_COUNT = 24;
+
 // Collisions
 
 const PLAYER_COLLISION_CHECKPOINT_BEHIND = -0.4;
@@ -182,6 +185,10 @@ class LevelManager {
           }
           case "B": {
             this.tiles.push(BrainTile(r, c, srow, scol));
+            break;
+          }
+          case "M": {
+            this.tiles.push(ModuleTile(r, c, srow, scol));
             break;
           }
           default: {
@@ -376,6 +383,21 @@ class LevelManager {
       this.game.drawText("[E]", hMid, vMid - 12 + 24, {
         color: "#ce1b1b",
         font: "700 18px monospace",
+        align: "center",
+      });
+    };
+  }
+
+  renderModulePopup(hMid, vMid) {
+    return () => {
+      this.game.drawText("MODULE OBTAINED", hMid, vMid - 12 - 12, {
+        color: "#ce1b1b",
+        font: "500 24px Alkhemikal",
+        align: "center",
+      });
+      this.game.drawText("-- LOCATE AN ALTAR --", hMid, vMid - 12 + 20, {
+        color: "#ce1b1b",
+        font: "500 18px Alkhemikal",
         align: "center",
       });
     };
@@ -582,6 +604,64 @@ class LevelManager {
       );
       this.animations.push(etherealBrain);
       this.ethereals.push(etherealBrain);
+    }
+
+    if (
+      currentTile?.type == TILE_TYPE_MODULE &&
+      !this.game.gotModules[currentTile.id]
+    ) {
+      // Get Module
+      this.game.gotModules[currentTile.id] = true;
+      this.acceptsInput = false;
+
+      // Make particles, behind popup
+      for (let i = 0; i < MODULE_PARTICLE_COUNT; i++) {
+        const vel = new Position(
+          maybeFlip(randomRange(5, 20)),
+          randomRange(-20, 5),
+        ).scale(0.3, 0.3);
+        const whichGiblet = Math.floor(4 * Math.random());
+        const size = randomRange(12, 24);
+        this.animations.push(
+          new ParticleAnimation(
+            RESPAWN_GIBLET_FRAMES,
+            new Position(GAME_WIDTH / 2, TILE_SIZE * 4),
+            vel,
+            // 50% chance to render gore
+            Math.random() < 0.5
+              ? ASSETS.EFFECTS.GLOW
+              : ASSETS.SPRITE.GIBLETS[whichGiblet],
+            size,
+            {
+              gravity: new Position(0, GRAVITY * 0.5),
+              shrink: 0.1,
+            },
+          ),
+        );
+      }
+
+      // Show module popup
+      const modulePopup = new PopupAnimation(
+        200,
+        50,
+        GAME_WIDTH / 2,
+        TILE_SIZE * 4,
+        false,
+        this.renderModulePopup(GAME_WIDTH / 2, TILE_SIZE * 4),
+        THUNK,
+        {
+          blocksInput: false,
+          speedMult: 0.5,
+          clipContents: true,
+          framesCallback: () => {
+            setTimeout(() => {
+              this.acceptsInput = true;
+              modulePopup.needsInput = false;
+            }, 1200);
+          },
+        },
+      );
+      this.animations.push(modulePopup);
     }
 
     // Draw checkpointers

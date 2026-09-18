@@ -50,7 +50,7 @@ const BrainTile = (r, c, srow, scol) => {
       const glowOsc = TILE_BRAIN_GLOW_OSC_AMPLITUDE * sinVal;
 
       game.ctx.save();
-      game.ctx.globalAlpha = 0.4;
+      game.ctx.globalAlpha = 0.1;
 
       game.ctx.translate((c + 0.5) * TILE_SIZE, (r + 0.5) * TILE_SIZE + yBob);
       game.ctx.rotate(ROTATION_SCALE * game.frame);
