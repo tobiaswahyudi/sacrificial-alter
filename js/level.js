@@ -181,7 +181,7 @@ class LevelManager {
             break;
           }
           case "B": {
-            this.tiles.push(BrainTile(r, c));
+            this.tiles.push(BrainTile(r, c, srow, scol));
             break;
           }
           default: {
@@ -191,6 +191,16 @@ class LevelManager {
           }
         }
       }
+    }
+
+    // Unbind, in case the altar or sign was at screen edge
+    if (this.signPopup) {
+      this.signPopup.needsInput = false;
+      this.signPopup = undefined;
+    }
+    if (this.altarPopup) {
+      this.altarPopup.needsInput = false;
+      this.altarPopup = undefined;
     }
   }
 
@@ -511,14 +521,24 @@ class LevelManager {
                       const newMapkeyEntry = MAPPED_KEYS_UNLOCKABLE[0];
                       MAPPED_KEYS_UNLOCKABLE = MAPPED_KEYS_UNLOCKABLE.splice(0);
 
-                      const newMapkey = newMapkeyEntry.obj
+                      const newMapkey = newMapkeyEntry.obj;
 
-                      this.game.rebindModal.mappedKeyButtonParams[newMapkeyEntry.key] =
-                        newMapkey;
+                      this.game.rebindModal.mappedKeyButtonParams[
+                        newMapkeyEntry.key
+                      ] = newMapkey;
 
-                      this.game.rebindModal.makeMapKeyButton([newMapkeyEntry.key, newMapkeyEntry.obj])
+                      this.game.rebindModal.makeMapKeyButton([
+                        newMapkeyEntry.key,
+                        newMapkeyEntry.obj,
+                      ]);
 
-                      this.animations.push(new JuiceAnimation(this.buttonJuice, GETBRAIN_BACKGROUND_FRAMES * 2, TILE_SIZE * 2));
+                      this.animations.push(
+                        new JuiceAnimation(
+                          this.buttonJuice,
+                          GETBRAIN_BACKGROUND_FRAMES * 2,
+                          TILE_SIZE * 2,
+                        ),
+                      );
 
                       const lastAnim = new EtherealIntroAnimation(
                         GETBRAIN_BACKGROUND_FRAMES * 2,
@@ -536,11 +556,13 @@ class LevelManager {
                           framesCallback: () => {
                             // Unwind all
                             setTimeout(() => {
-                              this.ethereals.forEach(a => a.needsInput = false);
+                              this.ethereals.forEach(
+                                (a) => (a.needsInput = false),
+                              );
                               this.acceptsInput = true;
-                            }, 500)
+                            }, 500);
                           },
-                          offset: this.buttonJuice
+                          offset: this.buttonJuice,
                         },
                       );
 

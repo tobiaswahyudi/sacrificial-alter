@@ -11,7 +11,33 @@ const TILE_BRAIN_GLOW_OSC_AMPLITUDE = 0.3 * TILE_SIZE;
 const ROTATION_SCALE = 0.01;
 
 const BrainTile = (r, c, srow, scol) => {
-  const id = `s(r${srow}c${scol})[${r}][${c}]`;
+  // Index OF the screen
+  let idScreenRow = srow
+  let idScreenCol = scol
+  // Index of the brain IN the screen
+  let idRow = r
+  let idCol = c
+
+  if(idRow == 0) {
+    idRow = TILE_ROWS;
+    idScreenRow--;
+  }
+  if(idRow == TILE_ROWS + 1) {
+    idRow = 1;
+    idScreenRow++;
+  }
+
+  if(idCol == 0) {
+    idCol = TILE_COLS;
+    idScreenCol--;
+  }
+  if(idCol == TILE_COLS+ 1) {
+    idCol = 1;
+    idScreenCol++;
+  }
+
+  const id = `s(r${idScreenRow},c${idScreenCol})[${idRow}][${idCol}]`;
+  console.log(id)
   return {
     type: TILE_TYPE_BRAIN,
     r,
