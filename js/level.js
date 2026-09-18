@@ -288,6 +288,11 @@ class LevelManager {
       this.game.rebindModal.show();
     }
 
+    // debug hack
+    if (this.game.keys["KeyP"]) {
+      this.game.rebindModal.show();
+    }
+
     // Restart
     if (this.game.keys["KeyR"]) {
       this.acceptsInput = false;
